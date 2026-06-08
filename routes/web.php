@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Support\Facades\Artisan;
 use App\Models\User;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
@@ -74,6 +75,15 @@ Route::get('/make-me-admin/{email}', function ($email) {
     }
     
     return "ဂုဏ်ယူပါတယ်ဗျာ! Email: " . $email . " ကို Admin အဖြစ် ပြောင်းလဲပေးလိုက်ပါပြီ။";
+});
+
+// ဆာဗာပေါ်က Cache တွေအကုန်လုံးကို အင်တာနက်ပေါ်ကနေ လှမ်းရှင်းမယ့် လင့်ခ်
+Route::get('/clear-everything', function () {
+    Artisan::call('config:clear');
+    Artisan::call('route:clear');
+    Artisan::call('view:clear');
+    Artisan::call('cache:clear');
+    return 'Laravel Caches Cleared Successfully! 🚀';
 });
 
 
