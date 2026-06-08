@@ -1,7 +1,7 @@
 FROM php:8.2-fpm-alpine
 
 # လိုအပ်တဲ့ System Dependencies တွေ သွင်းခြင်း
-RUN apk add --no-nginx supervisor curl libpng-dev libxml2-dev zip unzip git
+RUN apk add --no-cache nginx supervisor curl libpng-dev libxml2-dev zip unzip git
 
 # PHP Extensions သွင်းခြင်း
 RUN docker-php-ext-install pdo_mysql bcmath gd
