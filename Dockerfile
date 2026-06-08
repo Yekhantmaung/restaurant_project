@@ -32,11 +32,38 @@ RUN composer install --no-dev --optimize-autoloader --no-interaction
 # Laravel Storage နှင့် Cache ဖိုင်များအတွက် ခွင့်ပြုချက် (Permission) ပေးခြင်း
 RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
 
-# ကျွန်တော်တို့ ပြင်ဆင်ထားသော Nginx Config ကို အဓိကလမ်းကြောင်းတွင် အတင်းအစားထိုးခြင်း
-COPY nginx.conf /etc/nginx/nginx.conf
+# ⚠️ အရေးကြီးဆုံးအဆင့် - Nginx config ဖိုင်အဟောင်းတွေကို အပြတ်ဖျက်ပြီး Laravel Routing စနစ်အမှန်ကို တိုက်ရိုက် ရေးထည့်ခိုင်းလိုက်တာပါ
+RUN rm -f /etc/nginx/http.d/default.conf /etc/nginx/nginx.conf
+
+# Nginx ရဲ့ Main Config ကို ဆောက်ခြင်း
+RUN echo $'user www-data;\n\
+worker_processes auto;\n\
+pid /run/nginx.pid;\n\
+events { worker_connections 1024; }\n\
+http {\n\
+    include /etc/nginx/mime.types;\n\
+    default_type application/octet-stream;\n\
+    sendfile on;\n\
+    keepalive_timeout 65;\n\
+    server {\n\
+        listen 80;\n\
+        root /var/www/public;\n\
+        index index.php index.html;\n\
+        charset utf-8;\n\
+        location / {\n\
+            try_files $uri $uri/ /index.php?$query_string;\n\
+        }\n\
+        error_page 404 /index.php;\n\
+        location ~ \.php$ {\n\
+            fastcgi_pass 127.0.0.1:9000;\n\
+            fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;\n\
+            include fastcgi_params;\n\
+        }\n\
+    }\n\
+}' > /etc/nginx/nginx.conf
 
 # Port 80 ကို ဖွင့်ပေးခြင်း
 EXPOSE 80
 
-# PHP-FPM ကို Background တွင် Run ပြီး Nginx ကို ရှေ့တန်း (Foreground) တွင် အပိတ်မကျအောင် ထိန်းပြီး Run ခြင်း
+# PHP-FPM နှင့် Nginx ကို အပိတ်မကျအောင် စနစ်တကျ Run ခြင်း
 CMD php-fpm -D && nginx -g "daemon off;"
