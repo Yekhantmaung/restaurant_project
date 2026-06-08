@@ -1,30 +1,42 @@
 FROM php:8.2-fpm-alpine
 
-# လိုအပ်တဲ့ System Dependencies တွေ သွင်းခြင်း (postgresql-dev ထည့်ထားပါတယ်)
-RUN apk add --no-cache nginx supervisor curl libpng-dev libxml2-dev zip unzip git postgresql-dev
+# လိုအပ်သော System packages များနှင့် PHP Extensions များ သွင်းခြင်း
+RUN apk add --no-cache \
+    nginx \
+    shadow \
+    libpng-dev \
+    libjpeg-turbo-dev \
+    freetype-dev \
+    zip \
+    libzip-dev \
+    unzip \
+    git \
+    curl \
+    postgresql-dev
 
-# PHP Extensions သွင်းခြင်း (pdo_pgsql ထည့်ထားပါတယ်)
-RUN docker-php-ext-install pdo_mysql pdo_pgsql bcmath gd
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install gd pdo pdo_mysql pdo_pgsql zip
 
-# Composer ကို Docker ထဲ ထည့်ခြင်း
+# Composer သွင်းခြင်း
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Project ဖိုင်တွေကို Container ထဲ ကူးခြင်း
+# အလုပ်လုပ်မည့် Directory သတ်မှတ်ခြင်း
 WORKDIR /var/www
+
+# Project ဖိုင်များအားလုံးကို Container ထဲ ကူးထည့်ခြင်း
 COPY . .
 
-# Composer dependencies သွင်းခြင်း
+# Composer package များ သွင်းခြင်း
 RUN composer install --no-dev --optimize-autoloader --no-interaction
 
-# Permission သတ်မှတ်ချက် (ဒီအတိုင်းထားပါ)
+# Laravel Storage နှင့် Cache ဖိုင်များအတွက် ခွင့်ပြုချက် (Permission) ပေးခြင်း
 RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
 
-# ⚠️ အရင်စာကြောင်းကို ဖြုတ်ပြီး ဒီ (၂) ကြောင်းပဲ အစားထိုးရေးပေးပါဗျာ
-# (Nginx ရဲ့ Main Config နေရာရော၊ Default Config နေရာရော နှစ်ခုလုံးကို အပြတ်သိမ်းသွင်းလိုက်တာပါ)
+# ကျွန်တော်တို့ ပြင်ဆင်ထားသော Nginx Config ကို အဓိကလမ်းကြောင်းတွင် အတင်းအစားထိုးခြင်း
 COPY nginx.conf /etc/nginx/nginx.conf
-COPY nginx.conf /etc/nginx/http.d/default.conf
 
+# Port 80 ကို ဖွင့်ပေးခြင်း
 EXPOSE 80
 
-# Server ကို Run ခိုင်းခြင်း
-CMD nginx && php-fpm
+# PHP-FPM ကို Background တွင် Run ပြီး Nginx ကို ရှေ့တန်း (Foreground) တွင် အပိတ်မကျအောင် ထိန်းပြီး Run ခြင်း
+CMD php-fpm -D && nginx -g "daemon off;"
