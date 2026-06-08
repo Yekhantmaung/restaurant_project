@@ -16,17 +16,13 @@ COPY . .
 # Composer dependencies သွင်းခြင်း
 RUN composer install --no-dev --optimize-autoloader --no-interaction
 
-# Permission တွေ သတ်မှတ်ခြင်း
+# Permission သတ်မှတ်ချက် (ဒီအတိုင်းထားပါ)
 RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
 
-# Nginx Configuration ကို ကူးထည့်ခြင်း
+# Nginx config ကူးခြင်း (ဒီအတိုင်းထားပါ)
 COPY nginx.conf /etc/nginx/http.d/default.conf
 
-# Render ပေါ်မှာ run မယ့် port အတွက် ပြင်ဆင်ခြင်း
 EXPOSE 80
 
-# Website မပွင့်ခင် Database Migration ကို အလိုအလျောက် အရင် run ခိုင်းခြင်း
-RUN php artisan migrate --force
-
-# PHP-FPM ကော Nginx ပါ ပြိုင်တူ run ဖို့ Command ရေးခြင်း
-CMD nginx && php-fpm
+# ပြင်ဆင်ရမည့် အောက်ဆုံးစာကြောင်း (Runtime ကျမှ တစ်ခါတည်း အကုန် run ခိုင်းတာပါ)
+CMD php artisan migrate --force && nginx && php-fpm
