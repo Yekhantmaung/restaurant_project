@@ -1,9 +1,5 @@
-services:
-  - type: web
-    name: restaurant-project
-    runtime: php
-    buildCommand: "composer install --no-dev --optimize-autoloader && php artisan migrate --force"
-    startCommand: "php artisan serve --host=0.0.0.0 --port=$PORT"
-    envVars:
-      - key: APP_DEBUG
-        value: "true"
+envVars:
+      - key: DB_CONNECTION
+        value: mysql
+      - key: DB_TIMEOUT
+        value: "30" # ဒါက Database connection timeout ကို တိုးပေးတာပါ
