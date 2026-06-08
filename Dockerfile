@@ -24,5 +24,5 @@ COPY nginx.conf /etc/nginx/http.d/default.conf
 
 EXPOSE 80
 
-# ပြင်ဆင်ရမည့် အောက်ဆုံးစာကြောင်း (Runtime ကျမှ တစ်ခါတည်း အကုန် run ခိုင်းတာပါ)
-CMD php artisan migrate --force && nginx && php-fpm
+# Server ကို Run ခိုင်းခြင်း
+CMD nginx && php-fpm
