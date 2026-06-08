@@ -25,5 +25,8 @@ COPY nginx.conf /etc/nginx/http.d/default.conf
 # Render ပေါ်မှာ run မယ့် port အတွက် ပြင်ဆင်ခြင်း
 EXPOSE 80
 
+# Website မပွင့်ခင် Database Migration ကို အလိုအလျောက် အရင် run ခိုင်းခြင်း
+RUN php artisan migrate --force
+
 # PHP-FPM ကော Nginx ပါ ပြိုင်တူ run ဖို့ Command ရေးခြင်း
 CMD nginx && php-fpm
