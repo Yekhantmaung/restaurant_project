@@ -1,42 +1,40 @@
-FROM php:8.2-fpm-alpine
+FROM php:8.2-cli-alpine
 
-# လိုအပ်သော Packages များ သွင်းခြင်း
+# လိုအပ်သော System packages များနှင့် PHP Extensions များ သွင်းခြင်း
 RUN apk add --no-cache \
-    nginx shadow libpng-dev libjpeg-turbo-dev freetype-dev zip libzip-dev unzip git curl postgresql-dev
+    shadow \
+    libpng-dev \
+    libjpeg-turbo-dev \
+    freetype-dev \
+    zip \
+    libzip-dev \
+    unzip \
+    git \
+    curl \
+    postgresql-dev
 
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install gd pdo pdo_mysql pdo_pgsql zip
 
+# Composer သွင်းခြင်း
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
+# အလုပ်လုပ်မည့် Directory သတ်မှတ်ခြင်း
 WORKDIR /var/www
+
+# Project ဖိုင်များအားလုံးကို Container ထဲ ကူးထည့်ခြင်း
 COPY . .
 
+# Composer package များ သွင်းခြင်း
 RUN composer install --no-dev --optimize-autoloader --no-interaction
 
-# ⚠️ အရေးကြီးဆုံးအဆင့် - Nginx ရဲ့ default config လမ်းကြောင်းဟောင်းတွေကို အမြစ်ပြတ် ဆွဲဖြုတ်ပစ်တာပါ
-RUN rm -rf /etc/nginx/http.d/* /etc/nginx/conf.d/*
-
-# Laravel အလုပ်လုပ်မည့် Nginx Site Config အစစ်အမှန်ကို ဆောက်ခြင်း
-RUN echo $'server {\n\
-    listen 80;\n\
-    root /var/www/public;\n\
-    index index.php index.html;\n\
-    charset utf-8;\n\
-    location / {\n\
-        try_files $uri $uri/ /index.php?$query_string;\n\
-    }\n\
-    location ~ \.php$ {\n\
-        fastcgi_pass 127.0.0.1:9000;\n\
-        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;\n\
-        include fastcgi_params;\n\
-    }\n\
-}' > /etc/nginx/http.d/default.conf
-
-# Storage Permission ကို အပတ်စက် ပေးခြင်း
+# Laravel Storage နှင့် Cache ဖိုင်များအတွက် ခွင့်ပြုချက် (Permission) အပြည့်ပေးခြင်း
 RUN chmod -R 777 /var/www/storage /var/www/bootstrap/cache
-RUN chown -R www-data:www-data /var/www
+RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
 
+# Port 80 ကို ဖွင့်ပေးခြင်း
 EXPOSE 80
 
-CMD php-fpm -D && nginx -g "daemon off;"
+# ⚠️ Nginx ကို လုံးဝမသုံးတော့ဘဲ Laravel ရဲ့ Built-in ဆာဗာကို Port 80 မှာ တိုက်ရိုက် Run ခိုင်းခြင်း
+# ဒါဆိုရင် Routing စနစ်အားလုံးကို Laravel က သူ့ဖတ်သာသူ အော်တို စီမံသွားမှာဖြစ်လို့ 404 လုံးဝ မတက်နိုင်တော့ပါဘူး
+CMD php artisan serve --host=0.0.0.0 --port=80
