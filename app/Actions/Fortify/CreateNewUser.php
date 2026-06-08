@@ -23,6 +23,8 @@ class CreateNewUser implements CreatesNewUsers
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password' => $this->passwordRules(),
+            'phone' => ['required', 'string', 'max:255'],      // <-- Phone အတွက် Validation တိုးထားပါတယ်
+            'address' => ['required', 'string', 'max:255'],    // <-- Address အတွက် Validation တိုးထားပါတယ်
             'terms' => Jetstream::hasTermsAndPrivacyPolicyFeature() ? ['accepted', 'required'] : '',
         ])->validate();
 
@@ -30,9 +32,8 @@ class CreateNewUser implements CreatesNewUsers
             'name' => $input['name'],
             'email' => $input['email'],
             'password' => Hash::make($input['password']),
-            'phone' => $input['phone'],
-            'address' => $input['address'],
-
+            'phone' => $input['phone'],                        // <-- Form ကပါလာတဲ့ phone ကို သိမ်းဆည်းခြင်း
+            'address' => $input['address'],                    // <-- Form ကပါလာတဲ့ address ကို သိမ်းဆည်းခြင်း
         ]);
     }
 }
