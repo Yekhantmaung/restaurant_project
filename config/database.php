@@ -95,7 +95,10 @@ return [
             'prefix' => '',
             'prefix_indexes' => true,
             'search_path' => 'public',
-            'sslmode' => 'prefer',
+            'sslmode' => env('DB_SSLMODE', 'prefer'),
+            'options' => [
+                PDO::ATTR_TIMEOUT => 30, // ကွန်နက်ရှင်ကို စက္ကန့် ၃၀ အထိ စောင့်ခိုင်းသည့်အပိုင်း
+            ],
         ],
 
         'sqlsrv' => [
@@ -109,8 +112,6 @@ return [
             'charset' => env('DB_CHARSET', 'utf8'),
             'prefix' => '',
             'prefix_indexes' => true,
-            // 'encrypt' => env('DB_ENCRYPT', 'yes'),
-            // 'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE', 'false'),
         ],
 
     ],
