@@ -16,15 +16,12 @@ COPY . .
 # Composer dependencies သွင်းခြင်း
 RUN composer install --no-dev --optimize-autoloader --no-interaction
 
-# ... (အပေါ်က ကုဒ်တွေကို ဒီအတိုင်းထားပါ) ...
-
 # Permission သတ်မှတ်ချက် (ဒီအတိုင်းထားပါ)
 RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
 
-# ⚠️ အရေးကြီးဆုံးအဆင့် - ရှိသမျှ default config အဟောင်းတွေကို အမြစ်ပြတ်အောင် အတင်းဖျက်ခိုင်းလိုက်တာပါ
-RUN rm -f /etc/nginx/http.d/default.conf /etc/nginx/conf.d/default.conf /etc/nginx/nginx.conf
-
-# ပြီးမှ ကျွန်တော်တို့ရဲ့ Laravel ရေလမ်းကြောင်းပါတဲ့ nginx.conf ကို နေရာမှန်ဆီ သွားထည့်ခိုင်းပါမယ်
+# ⚠️ အရင်စာကြောင်းကို ဖြုတ်ပြီး ဒီ (၂) ကြောင်းပဲ အစားထိုးရေးပေးပါဗျာ
+# (Nginx ရဲ့ Main Config နေရာရော၊ Default Config နေရာရော နှစ်ခုလုံးကို အပြတ်သိမ်းသွင်းလိုက်တာပါ)
+COPY nginx.conf /etc/nginx/nginx.conf
 COPY nginx.conf /etc/nginx/http.d/default.conf
 
 EXPOSE 80
